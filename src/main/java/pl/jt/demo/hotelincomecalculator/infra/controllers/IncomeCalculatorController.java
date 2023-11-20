@@ -1,12 +1,11 @@
 package pl.jt.demo.hotelincomecalculator.infra.controllers;
 
+import java.math.BigDecimal;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,11 +38,9 @@ public class IncomeCalculatorController {
             schema = @Schema(implementation = GenericErrorResponse.class)) }),
   })
   @PostMapping("/calculate")
-  public ResponseEntity<OccupationAndIncomeResponse> calculateRoomOccupationAndIncome(@RequestBody CalculationRequest request) {
-    return ResponseEntity
-        .status(HttpStatus.OK)
-        .body(OccupationAndIncomeResponse
+  public OccupationAndIncomeResponse calculateRoomOccupationAndIncome(@RequestBody CalculationRequest request) {
+    return OccupationAndIncomeResponse
             .from(incomeCalculationService
-                .calculateRoomOccupationAndIncome(request.premiumRoomsAvailable(), request.economyRoomsAvailable(), request.willingnessToPayList())));
+                .calculateRoomOccupationAndIncome(request.premiumRoomsAvailable(), request.economyRoomsAvailable(), request.willingnessToPayList()));
   }
 }

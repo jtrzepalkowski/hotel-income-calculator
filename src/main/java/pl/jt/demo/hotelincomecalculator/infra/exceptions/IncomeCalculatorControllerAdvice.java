@@ -12,7 +12,7 @@ import pl.jt.demo.hotelincomecalculator.infra.responses.GenericErrorResponse;
 public class IncomeCalculatorControllerAdvice {
 
   @ExceptionHandler({RoomCountNotPositiveException.class, WillingnessToPayNotPositiveException.class})
-  public ResponseEntity<GenericErrorResponse> handleRequestMalformationExceptions(Exception e) {
+  public ResponseEntity<GenericErrorResponse> handleRequestMalformedExceptions(Exception e) {
     log.error("An error occurred", e);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new GenericErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
   }

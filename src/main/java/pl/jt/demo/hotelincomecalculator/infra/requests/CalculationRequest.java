@@ -4,5 +4,5 @@ import java.util.List;
 
 public record CalculationRequest(int premiumRoomsAvailable,
                                  int economyRoomsAvailable,
-                                 List<Integer> willingnessToPayList) {
+                                 List<Double> willingnessToPayList) {
 }

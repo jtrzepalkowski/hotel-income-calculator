@@ -1,10 +1,15 @@
 package pl.jt.demo.hotelincomecalculator.infra.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -45,10 +50,10 @@ public class IncomeCalculatorControllerIT extends BaseTestClass {
     OccupationAndIncomeResponse response = Objects.requireNonNull(responseEntity.getBody());
 
     assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-    assertEquals(response.occupiedPremiumRooms(), 3);
-    assertEquals(response.occupiedEconomyRooms(), 3);
-    assertEquals(response.profitFromPremiumRooms(), 738);
-    assertEquals(response.profitFromEconomyRooms(), 167);
+    assertEquals(3, response.occupiedPremiumRooms());
+    assertEquals(3, response.occupiedEconomyRooms());
+    assertEquals(738, response.profitFromPremiumRooms());
+    assertEquals(167, response.profitFromEconomyRooms());
   }
 
   @Test
@@ -58,7 +63,7 @@ public class IncomeCalculatorControllerIT extends BaseTestClass {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Content-Type", "application/json");
 
-    CalculationRequest request = new CalculationRequest(3, 3, List.of(1, 2, -123));
+    CalculationRequest request = new CalculationRequest(3, 3, List.of(1.0, 2.0, -123.0));
 
     HttpEntity<CalculationRequest> requestEntity = new HttpEntity<>(request, headers);
     ResponseEntity<GenericErrorResponse> responseEntity = testRestTemplate.postForEntity(url, requestEntity, GenericErrorResponse.class);
@@ -76,7 +81,7 @@ public class IncomeCalculatorControllerIT extends BaseTestClass {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Content-Type", "application/json");
 
-    CalculationRequest request = new CalculationRequest(3, -2, List.of(1, 2, 4));
+    CalculationRequest request = new CalculationRequest(3, -2, List.of(1.0, 2.0, 4.0));
 
     HttpEntity<CalculationRequest> requestEntity = new HttpEntity<>(request, headers);
     ResponseEntity<GenericErrorResponse> responseEntity = testRestTemplate.postForEntity(url, requestEntity, GenericErrorResponse.class);
@@ -94,10 +99,9 @@ public class IncomeCalculatorControllerIT extends BaseTestClass {
     HttpHeaders headers = new HttpHeaders();
     headers.add("Content-Type", "application/json");
 
-    CalculationRequest request = new CalculationRequest(3, 2, List.of(1, 2, 6));
+    CalculationRequest request = new CalculationRequest(3, 2, List.of(1.0, 2.0, 6.0));
 
-    Mockito.when(spyIncomeCalculationService.calculateRoomOccupationAndIncome(3,2, List.of(1, 2, 6)))
-        .thenThrow(new NullPointerException("test message"));
+    Mockito.doThrow(new NullPointerException("test message")).when(spyIncomeCalculationService).calculateRoomOccupationAndIncome(anyInt(), anyInt(), any());
 
     HttpEntity<CalculationRequest> requestEntity = new HttpEntity<>(request, headers);
     ResponseEntity<GenericErrorResponse> responseEntity = testRestTemplate.postForEntity(url, requestEntity, GenericErrorResponse.class);

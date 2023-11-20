@@ -19,13 +19,13 @@ public class BaseTestClass {
 
   @Autowired
   private ResourceLoader resourceLoader;
-  public List<Integer> willingnessToPay;
+  public List<Double> willingnessToPay;
 
   @BeforeAll
   void setUp() throws IOException {
     Resource resource = resourceLoader.getResource("classpath:willingnessToPayTestData.json");
     File file = resource.getFile();
-    willingnessToPay = List.of(new ObjectMapper().readValue(file, Integer[].class));
+    willingnessToPay = List.of(new ObjectMapper().readValue(file, Double[].class));
 
   }
 }
