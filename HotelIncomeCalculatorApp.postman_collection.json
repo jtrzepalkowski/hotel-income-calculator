@@ -1,0 +1,18 @@
+{
+	"info": {
+		"_postman_id": "fe3bef93-e243-453c-aa24-54b4f571d02b",
+		"name": "HotelIncomeCalculator App",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11070692"
+	},
+	"item": [
+		{
+			"name": "calculate",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
