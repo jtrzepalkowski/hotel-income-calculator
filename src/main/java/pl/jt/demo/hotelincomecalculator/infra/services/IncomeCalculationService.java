@@ -2,34 +2,43 @@ package pl.jt.demo.hotelincomecalculator.infra.services;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.jt.demo.hotelincomecalculator.domain.RoomOccupationAndIncome;
 
 @Service
+@Slf4j
 public class IncomeCalculationService {
 
   private final CustomInputValidationService validationService;
+  private final int maxUpgradeQualifications;
 
-  public IncomeCalculationService(CustomInputValidationService validationService) {
+  public IncomeCalculationService(final CustomInputValidationService validationService,
+                                  @Value("${calculation.max-upgrade-qualifications}") int maxUpgradeQualifications) {
     this.validationService = validationService;
+    this.maxUpgradeQualifications = maxUpgradeQualifications;
   }
 
   public RoomOccupationAndIncome calculateRoomOccupationAndIncome(int premiumRooms, int economyRooms, List<Integer> willingnessToPayData) {
 
     validationService.validateInput(premiumRooms, economyRooms, willingnessToPayData);
 
-    List<Integer> meantForPremium = willingnessToPayData.stream()
-        .filter(elem -> elem >= 100)
-        .sorted(Comparator.reverseOrder())
-        .toList();
-    List<Integer> meantForEconomy = willingnessToPayData.stream()
-        .filter(elem -> !meantForPremium.contains(elem))
-        .sorted(Comparator.reverseOrder())
-        .toList();
+    log.debug("commencing calculation");
+    Map<Boolean, List<Integer>> customerPartition = willingnessToPayData.stream()
+        .collect(Collectors.partitioningBy(elem -> elem >= 100));
+
+    List<Integer> premiumCustomers = customerPartition.get(true);
+    List<Integer> economyCustomers = customerPartition.get(false);
+
+    premiumCustomers.sort(Comparator.reverseOrder());
+    economyCustomers.sort(Comparator.reverseOrder());
 
     int usedPremium = 0, usedEconomy = 0, profitPremium = 0, profitEconomy = 0;
 
-    for (Integer value : meantForPremium) {
+    for (Integer value : premiumCustomers) {
       if (usedPremium == premiumRooms) {
         break;
       }
@@ -37,23 +46,25 @@ public class IncomeCalculationService {
       usedPremium += 1;
     }
 
-
-    if (meantForEconomy.size() > economyRooms && usedPremium < premiumRooms) {
-      //commented out for-loop due to assumption that only one highest paying from economy gets the free upgrade
-      //for (int i = meantForEconomy.size(); i > economyRooms; i = meantForEconomy.size()) {
-        profitPremium += meantForEconomy.get(0);
+    if (economyCustomers.size() > economyRooms && usedPremium < premiumRooms) {
+      int numberOfIterations = 0;
+      for (int i = economyCustomers.size(); i > economyRooms && numberOfIterations < maxUpgradeQualifications; i = economyCustomers.size()) {
+        profitPremium += economyCustomers.get(0);
         usedPremium += 1;
-        meantForEconomy = meantForEconomy.subList(1, meantForEconomy.size());
-      //}
+        economyCustomers = economyCustomers.subList(1, economyCustomers.size());
+        numberOfIterations++;
+      }
     }
 
-    for (Integer integer : meantForEconomy) {
+    for (Integer integer : economyCustomers) {
       if (usedEconomy == economyRooms) {
         break;
       }
       profitEconomy += integer;
       usedEconomy += 1;
     }
+
+    log.debug("finished calculation");
 
     return new RoomOccupationAndIncome(usedPremium, usedEconomy, profitPremium, profitEconomy);
 

@@ -1,42 +1,26 @@
-package pl.jt.demo.hotelincomecalculator.services;
+package pl.jt.demo.hotelincomecalculator.infra.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
 import java.util.stream.Stream;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import pl.jt.demo.hotelincomecalculator.config.BaseTestClass;
 import pl.jt.demo.hotelincomecalculator.domain.RoomOccupationAndIncome;
-import pl.jt.demo.hotelincomecalculator.infra.services.IncomeCalculationService;
 
 @SpringBootTest
-public class IncomeCalculationServiceTest {
+public class IncomeCalculationServiceTest extends BaseTestClass {
 
   @Autowired
   private IncomeCalculationService calculationService;
 
-  @Autowired
-  private ResourceLoader resourceLoader;
-
-  @Autowired
-  private ObjectMapper mapper;
-
   @ParameterizedTest
   @MethodSource("providePositiveTestData")
   void testCalculationOutcomeWithPositiveData(int premiumRooms, int economyRooms,
-                                              int premiumOccupied, int premiumProfit, int economyOccupied, int economyProfit) throws IOException {
-
-    Resource resource = resourceLoader.getResource("classpath:willingnessToPayTestData.json");
-    File file = resource.getFile();
-    List<Integer> willingnessToPay = List.of(mapper.readValue(file, Integer[].class));
+                                              int premiumOccupied, int premiumProfit, int economyOccupied, int economyProfit){
 
     RoomOccupationAndIncome result =
         calculationService.calculateRoomOccupationAndIncome(premiumRooms, economyRooms, willingnessToPay);
@@ -65,7 +49,9 @@ public class IncomeCalculationServiceTest {
         Arguments.of(1, 0,
                                1, 374, 0, 0),
         Arguments.of(8, 3,
-                               7, 1153, 3, 90)
+                               7, 1153, 3, 90),
+        Arguments.of(0, 0,
+                               0, 0, 0, 0)
     );
   }
 }
